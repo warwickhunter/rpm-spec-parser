@@ -36,7 +36,7 @@ public class RpmSpecParser {
         Map<Pattern, String> macroRegexs = Maps.newHashMap();
         for (String field : FIELDS) {
             StringBuilder fieldRegex = new StringBuilder("^");
-            StringBuilder macroRegex = new StringBuilder("%{");
+            StringBuilder macroRegex = new StringBuilder("%\\{");
             fieldRegex.append("(");
             for (int i = 0; i < field.length(); ++i) {
                 char ch = field.charAt(i);
@@ -55,7 +55,7 @@ public class RpmSpecParser {
                 }
             }
             fieldRegex.append(":)(.*)");
-            macroRegex.append("}");
+            macroRegex.append("\\}");
             fieldRegexs.put(Pattern.compile(fieldRegex.toString()), field);
             macroRegexs.put(Pattern.compile(macroRegex.toString()), field);
         }

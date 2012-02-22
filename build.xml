@@ -5,6 +5,7 @@
     <property environment="env"/>
     <property name="dir.build"     value="${basedir}/build"/>
     <property name="dir.src"       value="${basedir}/src"/>
+    <property name="dir.test"      value="${basedir}/tests"/>
     <property name="dir.dist"      value="${basedir}/dist"/>
     <property name="build.version" value="0.1"/>
 
@@ -18,14 +19,30 @@
         </fileset>
     </path>
 
-    <target name="compile" description="compile the source " >
+	<!-- TODO: this is wrong, fix it -->
+	<path id="classpath.test">
+        <fileset dir="${basedir}/lib">
+          <include name="*.jar" />
+        </fileset>
+        <pathelement location="${dir.build}/classes"/>
+        <pathelement location="${dir.build}/tests"/>
+	</path>
+
+    <target name="compile" description="compile the source">
         <mkdir dir="${dir.build}/classes"/>
         <javac srcdir="${dir.src}" destdir="${dir.build}/classes" includeantruntime="false">
             <classpath refid="classpath.base" />
         </javac>
     </target>
 
-    <target name="dist" depends="compile" description="generate the jar" >
+    <target name="compile-tests" description="compile the test source">
+        <mkdir dir="${dir.build}/tests"/>
+        <javac srcdir="${dir.test}" destdir="${dir.build}/tests" includeantruntime="false">
+            <classpath refid="classpath.test" />
+        </javac>
+    </target>
+
+	<target name="dist" depends="compile" description="generate the jar" >
         <mkdir dir="${dir.dist}"/>
         <jar destfile="${dir.dist}/${ant.project.name}-${build.version}.jar" basedir="${dir.build}/classes"/>
     </target>
@@ -35,7 +52,16 @@
         <delete dir="${dir.dist}"/>
     </target>
 
-    <target name="test" depends="dist" description="test it">
+    <!-- TODO: this is wrong, fix it -->
+    <target name="test" depends="compile,compile-tests" description="test it">
+        <junit failureProperty="test.failure">
+            <classpath refid="classpath.test" />
+        	<formatter type="plain"/>
+            <batchtest todir="${dir.dist}">
+                <fileset dir="${basedir}/tests" includes="**/*Test.java" />
+            </batchtest>
+        </junit>
+        <fail message="test failed" if="test.failure" />
         <ant antfile="test.xml" target="test"/>
     </target>
 
