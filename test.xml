@@ -1,0 +1,13 @@
+<project name="rpm-spec-parser-test" default="test">
+	<description>Ant file to execute my RPM Specfile parser task and test its operation</description>
+
+	<property name="dir.dist" value="${basedir}/dist" />
+
+	<taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${dir.dist}/rpm-spec-parser-0.1.jar" />
+
+	<target name="test" description="test the task">
+		<rpmspec srcfile="foo.spec" env="rpm1" />
+		<echo>rpm.wasa=${rpm1.wasa}</echo>
+	</target>
+
+</project>

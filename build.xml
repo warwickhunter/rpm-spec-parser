@@ -1,0 +1,42 @@
+<project name="rpm-spec-parser" default="dist">
+
+    <description>Ant file to build my RPM Specfile parser task</description>
+
+    <property environment="env"/>
+    <property name="dir.build"     value="${basedir}/build"/>
+    <property name="dir.src"       value="${basedir}/src"/>
+    <property name="dir.dist"      value="${basedir}/dist"/>
+    <property name="build.version" value="0.1"/>
+
+    <path id="classpath.base">
+        <pathelement location="${dir.build}/classes"/>
+        <fileset dir="${basedir}/lib">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${env.ANT_HOME}/lib">
+          <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <target name="compile" description="compile the source " >
+        <mkdir dir="${dir.build}/classes"/>
+        <javac srcdir="${dir.src}" destdir="${dir.build}/classes" includeantruntime="false">
+            <classpath refid="classpath.base" />
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile" description="generate the jar" >
+        <mkdir dir="${dir.dist}"/>
+        <jar destfile="${dir.dist}/${ant.project.name}-${build.version}.jar" basedir="${dir.build}/classes"/>
+    </target>
+
+    <target name="clean" description="clean up">
+        <delete dir="${dir.build}"/>
+        <delete dir="${dir.dist}"/>
+    </target>
+
+    <target name="test" depends="dist" description="test it">
+        <ant antfile="test.xml" target="test"/>
+    </target>
+
+</project>
