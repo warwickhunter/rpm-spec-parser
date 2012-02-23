@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -28,39 +29,42 @@ public class RpmSpecParser {
                                                          "url", "source[0-9]+", "group", "buildRoot", "buildArch",
                                                          "autoreqprov", "prefix", };
     private static final Map<Pattern, String> FIELD_PATTERNS;
-    private static final Map<Pattern, String> MACRO_PATTERNS;
+    private static final Map<Pattern, String> MACRO_MATCHER_PATTERNS;
+    private static final Map<String, Pattern> MACRO_REPLACE_PATTERNS;
     
     // Take the list of strings and turn them into case insensitive pattern matchers
     static {
         Map<Pattern, String> fieldRegexs = Maps.newHashMap();
-        Map<Pattern, String> macroRegexs = Maps.newHashMap();
+        Map<Pattern, String> macroMatchRegexs = Maps.newHashMap();
+        Map<String, Pattern> macroReplaceRegexs = Maps.newHashMap();
         for (String field : FIELDS) {
             StringBuilder fieldRegex = new StringBuilder("^");
-            StringBuilder macroRegex = new StringBuilder("%\\{");
+            StringBuilder macroMatchRegex = new StringBuilder(".*%\\{");
+            StringBuilder macroReplaceRegex = new StringBuilder("%\\{");
             fieldRegex.append("(");
             for (int i = 0; i < field.length(); ++i) {
                 char ch = field.charAt(i);
                 if (Character.isLetter(ch)) {
-                    fieldRegex.append("[");
-                    fieldRegex.append(Character.toLowerCase(ch));
-                    fieldRegex.append(Character.toUpperCase(ch));
-                    fieldRegex.append("]");
-                    macroRegex.append("[");
-                    macroRegex.append(Character.toLowerCase(ch));
-                    macroRegex.append(Character.toUpperCase(ch));
-                    macroRegex.append("]");
+                    String regex = String.format("[%c%c]", Character.toLowerCase(ch), Character.toUpperCase(ch));
+                    fieldRegex.append(regex);
+                    macroMatchRegex.append(regex);
+                    macroReplaceRegex.append(regex);
                 } else {
                     fieldRegex.append(ch);
-                    macroRegex.append(ch);
+                    macroMatchRegex.append(ch);
+                    macroReplaceRegex.append(ch);
                 }
             }
             fieldRegex.append(":)(.*)");
-            macroRegex.append("\\}");
+            macroMatchRegex.append("\\}.*");
+            macroReplaceRegex.append("\\}");
             fieldRegexs.put(Pattern.compile(fieldRegex.toString()), field);
-            macroRegexs.put(Pattern.compile(macroRegex.toString()), field);
+            macroMatchRegexs.put(Pattern.compile(macroMatchRegex.toString()), field);
+            macroReplaceRegexs.put(macroMatchRegex.toString(), Pattern.compile(macroReplaceRegex.toString()));
         }
         FIELD_PATTERNS = Collections.unmodifiableMap(fieldRegexs);
-        MACRO_PATTERNS = Collections.unmodifiableMap(macroRegexs);
+        MACRO_MATCHER_PATTERNS = Collections.unmodifiableMap(macroMatchRegexs);
+        MACRO_REPLACE_PATTERNS = Collections.unmodifiableMap(macroReplaceRegexs);
     }
     
     /** The path of the spec file to parse */
@@ -109,6 +113,19 @@ public class RpmSpecParser {
      * @param properties the properties to modify by expanding any directive values
      */
     private void expandMacros(Properties properties) {
-        // TODO: replace macros if they have values
+        Properties newProperties = new Properties();
+        for (Entry<Object, Object> property : properties.entrySet()) {
+            String newValue = property.getValue().toString();
+            for (Map.Entry<Pattern, String> macro : MACRO_MATCHER_PATTERNS.entrySet()) {
+                Matcher matcher = macro.getKey().matcher(property.getValue().toString());
+                if (matcher.matches()) {
+                    Pattern replacePattern = MACRO_REPLACE_PATTERNS.get(macro.getKey().toString());
+                    newValue = newValue.replaceAll(replacePattern.toString(), properties.getProperty(macro.getValue()));
+                }
+            }
+            newProperties.setProperty(property.getKey().toString(), newValue);
+        }
+        properties.clear();
+        properties.putAll(newProperties);
     }
 }
