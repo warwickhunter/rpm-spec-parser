@@ -24,7 +24,6 @@ public class RpmSpecParserTest {
 
     @Test
     public void test() {
-        System.out.println("test");
         try {
             RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
             assertNotNull(parser);

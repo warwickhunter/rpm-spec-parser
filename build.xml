@@ -1,4 +1,4 @@
-<project name="rpm-spec-parser" default="dist">
+<project name="rpm-spec-parser" default="test">
 
     <description>Ant file to build my RPM Specfile parser task</description>
 
@@ -21,11 +21,8 @@
 
 	<!-- TODO: this is wrong, fix it -->
 	<path id="classpath.test">
-        <fileset dir="${basedir}/lib">
-          <include name="*.jar" />
-        </fileset>
-        <pathelement location="${dir.build}/classes"/>
         <pathelement location="${dir.build}/tests"/>
+        <path refid="classpath.base" />
 	</path>
 
     <target name="compile" description="compile the source">
@@ -52,17 +49,18 @@
         <delete dir="${dir.dist}"/>
     </target>
 
-    <!-- TODO: this is wrong, fix it -->
-    <target name="test" depends="compile,compile-tests" description="test it">
-        <junit failureProperty="test.failure">
-            <classpath refid="classpath.test" />
-        	<formatter type="plain"/>
+    <target name="test" depends="dist,compile-tests" description="run junit test cases">
+        <junit failureProperty="test.failure" fork="true" forkMode="once">
+            <classpath refid="classpath.test"/>
+            <formatter type="brief" usefile="false"/>
+            <!-- Include all Test* classes in the test run -->
             <batchtest todir="${dir.dist}">
-                <fileset dir="${basedir}/tests" includes="**/*Test.java" />
+              <fileset dir="${basedir}/tests" includes="**/*Test.java"/>
             </batchtest>
         </junit>
         <fail message="test failed" if="test.failure" />
         <ant antfile="test.xml" target="test"/>
     </target>
-
+	
+	
 </project>
