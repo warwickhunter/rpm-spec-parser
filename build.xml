@@ -18,10 +18,10 @@
         </fileset>
     </path>
 
-	<path id="classpath.test">
+    <path id="classpath.test">
         <pathelement location="${dir.build}/tests"/>
         <path refid="classpath.base" />
-	</path>
+    </path>
 
     <target name="compile" description="compile the source">
         <mkdir dir="${dir.build}/classes"/>
@@ -37,9 +37,16 @@
         </javac>
     </target>
 
-	<target name="dist" depends="compile" description="generate the jar" >
+    <target name="dist" depends="compile" description="generate the jar" >
         <mkdir dir="${dir.dist}"/>
-        <jar destfile="${dir.dist}/${ant.project.name}-${build.version}.jar" basedir="${dir.build}/classes"/>
+        <jar destfile="${dir.dist}/${ant.project.name}-${build.version}.jar" basedir="${dir.build}/classes">
+            <manifest>
+                <attribute name="Built-By" value="Warwick Hunter w.hunter@computer.org"/>
+                <attribute name="Implementation-Vendor" value="Warwick Hunter"/>
+                <attribute name="Implementation-Title" value="RPM spec file parser"/>
+                <attribute name="Implementation-Version" value="${build.version}"/>
+            </manifest>
+          </jar>
     </target>
 
     <target name="clean" description="clean up">
