@@ -7,29 +7,28 @@ is defined and the ant scripts can query the spec file when building to get
 the version number and other interesting fields.
 
 Here is an example of how you might use it.
-```
-<project name="rpm-spec-parser-test" default="test">
 
-    <taskdef 
-        name="rpmspec" 
-        classname="org.computer.whunter.rpm.ant.RpmSpec" 
-        classpath="dist/rpm-spec-parser-0.1.jar" />
+    <project name="rpm-spec-parser-test" default="test">
 
-    <target name="init" description="get the info from the rpm spec file">
-        <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
-        <property name="foo" value="${r.source0}"/>
-    </target>
+        <taskdef 
+            name="rpmspec" 
+            classname="org.computer.whunter.rpm.ant.RpmSpec" 
+            classpath="dist/rpm-spec-parser-0.1.jar" />
 
-    <target name="test" depends="init" description="do something">
-        <echo>rpm.name=${r.name}</echo>
-        <echo>rpm.version=${r.version}</echo>
-        <echo>rpm.release=${r.release}</echo>
-        <echo>rpm.source0=${r.source0}</echo>
-        <echo>rpm.something=${r.something}</echo>
-        <echo>foo=${foo}</echo>
-    </target>
+        <target name="init" description="get the info from the rpm spec file">
+            <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
+            <property name="foo" value="${r.source0}"/>
+        </target>
 
-</project>
-```
+        <target name="test" depends="init" description="do something">
+            <echo>rpm.name=${r.name}</echo>
+            <echo>rpm.version=${r.version}</echo>
+            <echo>rpm.release=${r.release}</echo>
+            <echo>rpm.source0=${r.source0}</echo>
+            <echo>rpm.something=${r.something}</echo>
+            <echo>foo=${foo}</echo>
+        </target>
+
+    </project>
 
 Warwick Hunter 2012-02-23 
