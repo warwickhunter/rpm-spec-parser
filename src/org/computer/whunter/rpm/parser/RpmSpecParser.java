@@ -110,22 +110,34 @@ public class RpmSpecParser {
      * The values of fields can themselves contain the values of other directives. Search through the 
      * properties and replace these values if they are present.
      * 
-     * @param properties the properties to modify by expanding any directive values
+     * @param properties the properties to modify by expanding any values
      */
     private void expandMacros(Properties properties) {
         Properties newProperties = new Properties();
         for (Entry<Object, Object> property : properties.entrySet()) {
-            String newValue = property.getValue().toString();
-            for (Map.Entry<Pattern, String> macro : MACRO_MATCHER_PATTERNS.entrySet()) {
-                Matcher matcher = macro.getKey().matcher(property.getValue().toString());
-                if (matcher.matches()) {
-                    Pattern replacePattern = MACRO_REPLACE_PATTERNS.get(macro.getKey().toString());
-                    newValue = newValue.replaceAll(replacePattern.toString(), properties.getProperty(macro.getValue()));
-                }
-            }
+            String newValue = expandMacros(property.getValue().toString(), properties);
             newProperties.setProperty(property.getKey().toString(), newValue);
         }
         properties.clear();
         properties.putAll(newProperties);
+    }
+
+    /** 
+     * The values of fields can themselves contain the values of other directives. Search through the 
+     * property value and replace these values if they are present.
+     *
+     * @param propertyValue the value to search for any replacements
+     * @param properties the properties to use to expand any values
+     */
+    private String expandMacros(String propertyValue, Properties properties) {
+        String newValue = propertyValue;
+        for (Map.Entry<Pattern, String> macro : MACRO_MATCHER_PATTERNS.entrySet()) {
+            Matcher matcher = macro.getKey().matcher(propertyValue);
+            if (matcher.matches()) {
+                Pattern replacePattern = MACRO_REPLACE_PATTERNS.get(macro.getKey().toString());
+                newValue = newValue.replaceAll(replacePattern.toString(), properties.getProperty(macro.getValue()));
+            }
+        }
+        return newValue;
     }
 }
