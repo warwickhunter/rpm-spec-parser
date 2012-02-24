@@ -1,4 +1,4 @@
-The rpm-spec-parser is a java API and Ant task that allows you to parse an 
+The rpm-spec-parser is a Java API and Ant task that allows you to parse an 
 RPM spec file and extract items that are defined inside it. 
 
 It's useful for building java code that is to be shipped inside an RPM. 
