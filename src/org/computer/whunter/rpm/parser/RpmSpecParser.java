@@ -17,23 +17,41 @@ import com.google.common.collect.Maps;
 
 /**
  * This is a parser of an RPM Spec file. It extracts a number of properties from an RPM spec file
- * and presents them as properties.
+ * and presents them as properties. Some properties can refer to the values of other properties with
+ * a syntax of %{fieldName}. The references are expanded in the properties where possible.
  * 
  * @author Warwick Hunter (w.hunter@computer.org)
  * @date   2012-02-22
  */
 public class RpmSpecParser {
     
-    private static final String[]             FIELDS = { "name", "version", "release", "buildrequires", "requires",
-                                                         "summary", "license", "vendor", "packager", "provides",
-                                                         "url", "source[0-9]+", "group", "buildRoot", "buildArch",
-                                                         "autoreqprov", "prefix", };
-    private static final Map<Pattern, String> FIELD_PATTERNS;
-    private static final Map<Pattern, String> MACRO_MATCHER_PATTERNS;
-    private static final Map<String, Pattern> MACRO_REPLACE_PATTERNS;
+    private static final String[] FIELDS = { "name", "version", "release", "buildrequires", "requires",
+                                             "summary", "license", "vendor", "packager", "provides",
+                                             "url", "source[0-9]+", "group", "buildRoot", "buildArch",
+                                             "autoreqprov", "prefix", };
+
+    private final Map<Pattern, String> m_fieldPatterns;
+    private final Map<Pattern, String> m_fieldReferenceMatcherPatterns;
+    private final Map<String, Pattern> m_fieldReferenceReplacePatterns;
     
-    // Take the list of strings and turn them into case insensitive pattern matchers
-    static {
+    /** The path of the spec file to parse */
+    private final String m_specFilePath;
+    
+    /**
+     * Create a parser that will parse an RPM spec file.
+     *  
+     * @param specFilePath the patch of the spec file to parse.
+     * @return a parser ready to parse the file.
+     */
+    public static RpmSpecParser createParser(String specFilePath) {
+        return new RpmSpecParser(specFilePath);
+    }
+    
+    /** Private constructor */
+    private RpmSpecParser(String specFilePath) {
+        m_specFilePath = specFilePath;
+
+        // Take the list of strings and turn them into case insensitive pattern matchers
         Map<Pattern, String> fieldRegexs = Maps.newHashMap();
         Map<Pattern, String> macroMatchRegexs = Maps.newHashMap();
         Map<String, Pattern> macroReplaceRegexs = Maps.newHashMap();
@@ -62,27 +80,9 @@ public class RpmSpecParser {
             macroMatchRegexs.put(Pattern.compile(macroMatchRegex.toString()), field);
             macroReplaceRegexs.put(macroMatchRegex.toString(), Pattern.compile(macroReplaceRegex.toString()));
         }
-        FIELD_PATTERNS = Collections.unmodifiableMap(fieldRegexs);
-        MACRO_MATCHER_PATTERNS = Collections.unmodifiableMap(macroMatchRegexs);
-        MACRO_REPLACE_PATTERNS = Collections.unmodifiableMap(macroReplaceRegexs);
-    }
-    
-    /** The path of the spec file to parse */
-    private final String m_specFilePath;
-    
-    /**
-     * Create a parser that will parse an RPM spec file.
-     *  
-     * @param specFilePath the patch of the spec file to parse.
-     * @return a parser ready to parse the file.
-     */
-    public static RpmSpecParser createParser(String specFilePath) {
-        return new RpmSpecParser(specFilePath);
-    }
-    
-    /** Private constructor */
-    private RpmSpecParser(String specFilePath) {
-        m_specFilePath = specFilePath;
+        m_fieldPatterns = Collections.unmodifiableMap(fieldRegexs);
+        m_fieldReferenceMatcherPatterns = Collections.unmodifiableMap(macroMatchRegexs);
+        m_fieldReferenceReplacePatterns = Collections.unmodifiableMap(macroReplaceRegexs);
     }
 
     /**
@@ -95,14 +95,14 @@ public class RpmSpecParser {
         Scanner scanner = new Scanner(new File(m_specFilePath));
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
-            for (Map.Entry<Pattern, String> entry : FIELD_PATTERNS.entrySet()) {
+            for (Map.Entry<Pattern, String> entry : m_fieldPatterns.entrySet()) {
                 Matcher matcher = entry.getKey().matcher(line);
                 if (matcher.matches() && matcher.groupCount() > 1) {
                     properties.setProperty(matcher.group(1).replaceAll(":","").toLowerCase(), matcher.group(2).trim());
                 }
             }
         }
-        expandMacros(properties);
+        expandFieldReferences(properties);
         return properties;
     }
     
@@ -112,10 +112,10 @@ public class RpmSpecParser {
      * 
      * @param properties the properties to modify by expanding any values
      */
-    private void expandMacros(Properties properties) {
+    private void expandFieldReferences(Properties properties) {
         Properties newProperties = new Properties();
         for (Entry<Object, Object> property : properties.entrySet()) {
-            String newValue = expandMacros(property.getValue().toString(), properties);
+            String newValue = expandFieldReferences(property.getValue().toString(), properties);
             newProperties.setProperty(property.getKey().toString(), newValue);
         }
         properties.clear();
@@ -129,12 +129,12 @@ public class RpmSpecParser {
      * @param propertyValue the value to search for any replacements
      * @param properties the properties to use to expand any values
      */
-    private String expandMacros(String propertyValue, Properties properties) {
+    private String expandFieldReferences(String propertyValue, Properties properties) {
         String newValue = propertyValue;
-        for (Map.Entry<Pattern, String> macro : MACRO_MATCHER_PATTERNS.entrySet()) {
+        for (Map.Entry<Pattern, String> macro : m_fieldReferenceMatcherPatterns.entrySet()) {
             Matcher matcher = macro.getKey().matcher(propertyValue);
             if (matcher.matches()) {
-                Pattern replacePattern = MACRO_REPLACE_PATTERNS.get(macro.getKey().toString());
+                Pattern replacePattern = m_fieldReferenceReplacePatterns.get(macro.getKey().toString());
                 newValue = newValue.replaceAll(replacePattern.toString(), properties.getProperty(macro.getValue()));
             }
         }
