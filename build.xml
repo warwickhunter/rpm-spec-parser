@@ -1,6 +1,5 @@
 <project name="rpm-spec-parser" default="test">
-
-    <description>Ant file to build my RPM Specfile parser task</description>
+    <description>Ant file to build my RPM spec file parser task</description>
 
     <property environment="env"/>
     <property name="dir.build"     value="${basedir}/build"/>
@@ -19,7 +18,6 @@
         </fileset>
     </path>
 
-	<!-- TODO: this is wrong, fix it -->
 	<path id="classpath.test">
         <pathelement location="${dir.build}/tests"/>
         <path refid="classpath.base" />
@@ -53,7 +51,6 @@
         <junit failureProperty="test.failure" fork="true" forkMode="once">
             <classpath refid="classpath.test"/>
             <formatter type="brief" usefile="false"/>
-            <!-- Include all Test* classes in the test run -->
             <batchtest todir="${dir.dist}">
               <fileset dir="${basedir}/tests" includes="**/*Test.java"/>
             </batchtest>
@@ -61,6 +58,5 @@
         <fail message="test failed" if="test.failure" />
         <ant antfile="test.xml" target="test"/>
     </target>
-	
-	
+
 </project>
