@@ -45,6 +45,7 @@ public class RpmSpecParserTest {
             assertEquals("p4bugzilla-1.1.tar.gz", properties.getProperty("source0"));
             assertEquals("jdk >= 1.5", properties.getProperty("requires"));
             assertEquals("https://sites.google.com/site/warwickhunter", properties.getProperty("url"));
+            assertEquals("defined here", properties.getProperty("something"));
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();

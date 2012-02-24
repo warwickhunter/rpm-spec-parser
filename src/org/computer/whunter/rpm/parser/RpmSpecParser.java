@@ -6,14 +6,13 @@ package org.computer.whunter.rpm.parser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Maps;
 
 /**
  * This is a parser of an RPM Spec file. It extracts a number of properties from an RPM spec file
@@ -30,13 +29,15 @@ public class RpmSpecParser {
                                              "url", "source[0-9]+", "group", "buildRoot", "buildArch",
                                              "autoreqprov", "prefix", };
 
+    private static final String MACRO_DEFINITION_PATTERN = "^%\\w+\\s.*" ;
+
     private final Map<Pattern, String> m_fieldPatterns;
     private final Map<Pattern, String> m_fieldReferenceMatcherPatterns;
     private final Map<String, Pattern> m_fieldReferenceReplacePatterns;
     
     /** The path of the spec file to parse */
     private final String m_specFilePath;
-    
+
     /**
      * Create a parser that will parse an RPM spec file.
      *  
@@ -52,9 +53,9 @@ public class RpmSpecParser {
         m_specFilePath = specFilePath;
 
         // Take the list of strings and turn them into case insensitive pattern matchers
-        Map<Pattern, String> fieldRegexs = Maps.newHashMap();
-        Map<Pattern, String> macroMatchRegexs = Maps.newHashMap();
-        Map<String, Pattern> macroReplaceRegexs = Maps.newHashMap();
+        Map<Pattern, String> fieldRegexs = new HashMap<Pattern, String>();
+        Map<Pattern, String> macroMatchRegexs = new HashMap<Pattern, String>();
+        Map<String, Pattern> macroReplaceRegexs = new HashMap<String, Pattern>();
         for (String field : FIELDS) {
             StringBuilder fieldRegex = new StringBuilder("^");
             StringBuilder macroMatchRegex = new StringBuilder(".*%\\{");
@@ -95,27 +96,46 @@ public class RpmSpecParser {
         Scanner scanner = new Scanner(new File(m_specFilePath));
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
+            if (line.startsWith("#")) {
+                // Discard comments
+                continue;
+            }
+            // Examine the line to see if it's a field 
             for (Map.Entry<Pattern, String> entry : m_fieldPatterns.entrySet()) {
                 Matcher matcher = entry.getKey().matcher(line);
                 if (matcher.matches() && matcher.groupCount() > 1) {
                     properties.setProperty(matcher.group(1).replaceAll(":","").toLowerCase(), matcher.group(2).trim());
                 }
             }
+            // Examine the line to see if it's a macro definition 
+            if (line.matches(MACRO_DEFINITION_PATTERN)) {
+                String[] words = line.split("\\s");
+                if (words != null && words.length > 1) {
+                    StringBuilder value = new StringBuilder();
+                    for (int i = 1; i < words.length; ++i) {
+                        if (i != 1) {
+                            value.append(" ");
+                        }
+                        value.append(words[i]);
+                    }
+                    properties.setProperty(words[0].replace("%", ""), value.toString().trim());
+                }
+            }
         }
-        expandFieldReferences(properties);
+        expandReferences(properties);
         return properties;
     }
     
     /** 
-     * The values of fields can themselves contain the values of other directives. Search through the 
+     * The values of fields and macros can themselves contain the values of other directives. Search through the 
      * properties and replace these values if they are present.
      * 
      * @param properties the properties to modify by expanding any values
      */
-    private void expandFieldReferences(Properties properties) {
+    private void expandReferences(Properties properties) {
         Properties newProperties = new Properties();
         for (Entry<Object, Object> property : properties.entrySet()) {
-            String newValue = expandFieldReferences(property.getValue().toString(), properties);
+            String newValue = expandReferences(property.getValue().toString(), properties);
             newProperties.setProperty(property.getKey().toString(), newValue);
         }
         properties.clear();
@@ -123,13 +143,13 @@ public class RpmSpecParser {
     }
 
     /** 
-     * The values of fields can themselves contain the values of other directives. Search through the 
+     * The values of fields and macros can themselves contain the values of other directives. Search through the 
      * property value and replace these values if they are present.
      *
      * @param propertyValue the value to search for any replacements
      * @param properties the properties to use to expand any values
      */
-    private String expandFieldReferences(String propertyValue, Properties properties) {
+    private String expandReferences(String propertyValue, Properties properties) {
         String newValue = propertyValue;
         for (Map.Entry<Pattern, String> macro : m_fieldReferenceMatcherPatterns.entrySet()) {
             Matcher matcher = macro.getKey().matcher(propertyValue);

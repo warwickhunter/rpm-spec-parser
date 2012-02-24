@@ -1,3 +1,5 @@
+%something defined here
+
 Summary:       Perforce to Bugzilla Bridge
 Name:          p4bugzilla
 Version:       1.1
