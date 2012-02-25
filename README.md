@@ -13,7 +13,7 @@ Here is an example of how you might use the ant task.
         <taskdef 
             name="rpmspec" 
             classname="org.computer.whunter.rpm.ant.RpmSpec" 
-            classpath="dist/rpm-spec-parser-0.2.jar" />
+            classpath="dist/rpm-spec-parser-1.0.jar" />
 
         <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
         <property name="foo" value="${r.source0}"/>

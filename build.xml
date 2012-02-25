@@ -6,7 +6,7 @@
     <property name="dir.src"       value="${basedir}/src"/>
     <property name="dir.test"      value="${basedir}/tests"/>
     <property name="dir.dist"      value="${basedir}/dist"/>
-    <property name="build.version" value="0.2"/>
+    <property name="build.version" value="1.0"/>
 
     <path id="classpath.base">
         <pathelement location="${dir.build}/classes"/>
