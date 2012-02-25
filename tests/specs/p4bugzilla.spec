@@ -1,4 +1,4 @@
-%something defined here
+%define something defined here
 
 Summary:       Perforce to Bugzilla Bridge
 Name:          p4bugzilla

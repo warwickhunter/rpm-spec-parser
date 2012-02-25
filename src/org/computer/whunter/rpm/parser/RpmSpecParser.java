@@ -29,7 +29,7 @@ public class RpmSpecParser {
                                              "url", "source[0-9]+", "group", "buildRoot", "buildArch",
                                              "autoreqprov", "prefix", };
 
-    private static final String MACRO_DEFINITION_PATTERN = "^%\\w+\\s.*" ;
+    private static final String MACRO_DEFINITION_PATTERN = "^%define\\s.*";
 
     private final Map<Pattern, String> m_fieldPatterns;
     private final Map<Pattern, String> m_fieldReferenceMatcherPatterns;
@@ -100,6 +100,7 @@ public class RpmSpecParser {
                 // Discard comments
                 continue;
             }
+            
             // Examine the line to see if it's a field 
             for (Map.Entry<Pattern, String> entry : m_fieldPatterns.entrySet()) {
                 Matcher matcher = entry.getKey().matcher(line);
@@ -110,15 +111,15 @@ public class RpmSpecParser {
             // Examine the line to see if it's a macro definition 
             if (line.matches(MACRO_DEFINITION_PATTERN)) {
                 String[] words = line.split("\\s");
-                if (words != null && words.length > 1) {
+                if (words != null && words.length > 2) {
                     StringBuilder value = new StringBuilder();
-                    for (int i = 1; i < words.length; ++i) {
-                        if (i != 1) {
+                    for (int i = 2; i < words.length; ++i) {
+                        if (i != 2) {
                             value.append(" ");
                         }
                         value.append(words[i]);
                     }
-                    properties.setProperty(words[0].replace("%", ""), value.toString().trim());
+                    properties.setProperty(words[1], value.toString().trim());
                 }
             }
         }
