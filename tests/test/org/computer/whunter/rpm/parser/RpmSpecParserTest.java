@@ -70,4 +70,17 @@ public class RpmSpecParserTest {
             fail(e.toString());
         }
     }
+
+    @Test
+    public void testExampleCode() {
+        try {
+            RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
+            Properties properties = parser.parse();
+            System.out.printf("RPM name: %s %n", properties.getProperty("name"));
+            System.out.printf("RPM version: %s-%s %n", properties.getProperty("version"), properties.getProperty("release"));
+        }
+        catch (FileNotFoundException e) {
+            // ...
+        }
+    }
 }
