@@ -5,12 +5,10 @@
 
 	<taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${dir.dist}/rpm-spec-parser-0.2.jar" />
 
-	<target name="init" description="get the info from the rpm spec file">
-		<rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
-		<property name="foo" value="${r.source0}"/>
-	</target>
+    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
+    <property name="foo" value="${r.source0}"/>
 
-    <target name="test" depends="init" description="test the task">
+    <target name="test" description="test the task">
         <echo>rpm.name=${r.name}</echo>
         <echo>rpm.version=${r.version}</echo>
         <echo>rpm.release=${r.release}</echo>

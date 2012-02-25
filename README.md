@@ -15,12 +15,10 @@ Here is an example of how you might use the ant task.
             classname="org.computer.whunter.rpm.ant.RpmSpec" 
             classpath="dist/rpm-spec-parser-0.2.jar" />
 
-        <target name="init" description="get the info from the rpm spec file">
-            <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
-            <property name="foo" value="${r.source0}"/>
-        </target>
-
-        <target name="test" depends="init" description="do something">
+        <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
+        <property name="foo" value="${r.source0}"/>
+    
+        <target name="test" description="test the task">
             <echo>rpm.name=${r.name}</echo>
             <echo>rpm.version=${r.version}</echo>
             <echo>rpm.release=${r.release}</echo>
