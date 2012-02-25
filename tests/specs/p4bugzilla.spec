@@ -1,11 +1,11 @@
-%define something defined here
+%define who Warwick Hunter
 
 Summary:       Perforce to Bugzilla Bridge
 Name:          p4bugzilla
 Version:       1.1
 Release:       1
 License:       Apache 2.0
-Vendor:        Warwick Hunter
+Vendor:        %{who} himself
 Packager:      w.hunter@computer.org
 Provides:      %{name}-%{version}-%{release}
 Requires:      jdk >= 1.5

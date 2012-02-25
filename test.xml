@@ -3,7 +3,7 @@
 
 	<property name="dir.dist" value="${basedir}/dist" />
 
-	<taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${dir.dist}/rpm-spec-parser-0.1.jar" />
+	<taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${dir.dist}/rpm-spec-parser-0.2.jar" />
 
 	<target name="init" description="get the info from the rpm spec file">
 		<rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" />
@@ -15,7 +15,7 @@
         <echo>rpm.version=${r.version}</echo>
         <echo>rpm.release=${r.release}</echo>
         <echo>rpm.source0=${r.source0}</echo>
-        <echo>rpm.something=${r.something}</echo>
+        <echo>rpm.who=${r.who}</echo>
         <echo>foo=${foo}</echo>
     </target>
 

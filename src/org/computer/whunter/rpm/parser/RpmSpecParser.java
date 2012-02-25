@@ -34,6 +34,8 @@ public class RpmSpecParser {
     private final Map<Pattern, String> m_fieldPatterns;
     private final Map<Pattern, String> m_fieldReferenceMatcherPatterns;
     private final Map<String, Pattern> m_fieldReferenceReplacePatterns;
+    private final Map<Pattern, String> m_macroReferenceMatcherPatterns = new HashMap<Pattern, String>();
+    private final Map<String, Pattern> m_macroReferenceReplacePatterns = new HashMap<String, Pattern>();
     
     /** The path of the spec file to parse */
     private final String m_specFilePath;
@@ -120,6 +122,24 @@ public class RpmSpecParser {
                         value.append(words[i]);
                     }
                     properties.setProperty(words[1], value.toString().trim());
+                    // Add a matcher pattern for it so that any references to it can be expanded
+                    StringBuilder macroMatchRegex = new StringBuilder(".*%\\{");
+                    StringBuilder macroReplaceRegex = new StringBuilder("%\\{");
+                    for (int i = 0; i < words[1].length(); ++i) {
+                        char ch = words[1].charAt(i);
+                        if (Character.isLetter(ch)) {
+                            String regex = String.format("[%c%c]", Character.toLowerCase(ch), Character.toUpperCase(ch));
+                            macroMatchRegex.append(regex);
+                            macroReplaceRegex.append(regex);
+                        } else {
+                            macroMatchRegex.append(ch);
+                            macroReplaceRegex.append(ch);
+                        }
+                    }
+                    macroMatchRegex.append("\\}.*");
+                    macroReplaceRegex.append("\\}");
+                    m_macroReferenceMatcherPatterns.put(Pattern.compile(macroMatchRegex.toString()), words[1]);
+                    m_macroReferenceReplacePatterns.put(macroMatchRegex.toString(), Pattern.compile(macroReplaceRegex.toString()));
                 }
             }
         }
@@ -134,9 +154,18 @@ public class RpmSpecParser {
      * @param properties the properties to modify by expanding any values
      */
     private void expandReferences(Properties properties) {
+
+        Map<Pattern, String> matcherPatterns = new HashMap<Pattern, String>();
+        matcherPatterns.putAll(m_fieldReferenceMatcherPatterns);
+        matcherPatterns.putAll(m_macroReferenceMatcherPatterns);
+
+        Map<String, Pattern> replacePatterns = new HashMap<String, Pattern>();
+        replacePatterns.putAll(m_fieldReferenceReplacePatterns);
+        replacePatterns.putAll(m_macroReferenceReplacePatterns);
+
         Properties newProperties = new Properties();
         for (Entry<Object, Object> property : properties.entrySet()) {
-            String newValue = expandReferences(property.getValue().toString(), properties);
+            String newValue = expandReferences(property.getValue().toString(), properties, matcherPatterns, replacePatterns);
             newProperties.setProperty(property.getKey().toString(), newValue);
         }
         properties.clear();
@@ -149,13 +178,19 @@ public class RpmSpecParser {
      *
      * @param propertyValue the value to search for any replacements
      * @param properties the properties to use to expand any values
+     * @param matcherPatterns patterns to find references to fields or macros
+     * @param replacePatterns patters to replace references to fields or macros with the values
      */
-    private String expandReferences(String propertyValue, Properties properties) {
+    private String expandReferences(String propertyValue, Properties properties, 
+                                    Map<Pattern, String> matcherPatterns, 
+                                    Map<String, Pattern> replacePatterns) {
+
         String newValue = propertyValue;
-        for (Map.Entry<Pattern, String> macro : m_fieldReferenceMatcherPatterns.entrySet()) {
+
+        for (Map.Entry<Pattern, String> macro : matcherPatterns.entrySet()) {
             Matcher matcher = macro.getKey().matcher(propertyValue);
             if (matcher.matches()) {
-                Pattern replacePattern = m_fieldReferenceReplacePatterns.get(macro.getKey().toString());
+                Pattern replacePattern = replacePatterns.get(macro.getKey().toString());
                 newValue = newValue.replaceAll(replacePattern.toString(), properties.getProperty(macro.getValue()));
             }
         }
