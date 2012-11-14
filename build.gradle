@@ -63,7 +63,7 @@ jar {
     }
 }
 
-task testAnt {
+task testAnt(dependsOn: compileJava) {
     inputs.file 'test.xml'
 }
 
