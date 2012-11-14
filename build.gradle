@@ -1,0 +1,78 @@
+/**
+ * Copyright 2012, Sean Flanigan. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ * 
+ *  1. Redistributions of source code must retain the above copyright notice, this list 
+ *     of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright notice, this 
+ *     list of conditions and the following disclaimer in the documentation and/or other 
+ *     materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+// Gradle project to build RPM spec file parser Ant task
+
+
+// To get a list of tasks, run:
+// $ gradle tasks
+
+
+// if you don't have Gradle installed, you can run
+// $ ./gradlew <task>
+// instead of
+// $ gradle <task>
+// and Gradle will be downloaded automatically.
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.2'
+}
+
+apply plugin:'java'
+apply plugin:'maven'
+
+group = 'org.computer.whunter.rpm'
+archivesBaseName = 'rpm-spec-parser'
+version = '1.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.guava:guava:13.0.1', 'org.apache.ant:ant:1.8.4'
+    testCompile 'junit:junit:4.10'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'RPM spec file parser', 'Implementation-Version': version
+    }
+}
+
+task testAnt {
+    inputs.file 'test.xml'
+}
+
+testAnt << {
+    // Tell Ant where to find dependency jars
+    ant.properties['runtimeClasspath'] = 'build/classes/main:'+configurations.runtime.asPath
+    ant.ant(antfile:'test.xml', target:'testTask')
+}
+
+test {
+    dependsOn testAnt
+}
