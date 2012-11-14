@@ -1,0 +1,8 @@
+<ivy-module version="2.0">
+    <info organisation="org.computer.whunter.rpm" module="rpm-spec-parser"/>
+    <dependencies>
+        <dependency org="com.google.guava" name="guava" rev="13.0.1" />
+        <dependency org="org.apache.ant" name="ant" rev="1.8.4" />
+        <dependency org="junit" name="junit" rev="4.10" />
+    </dependencies>
+</ivy-module>

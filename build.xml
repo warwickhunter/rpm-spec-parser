@@ -1,5 +1,6 @@
 <!--
 Copyright (c) 2012, Warwick Hunter. All rights reserved.
+Copyright 2012, Sean Flanigan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -21,7 +22,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<project name="rpm-spec-parser" default="test">
+<project name="rpm-spec-parser" default="test" xmlns:ivy="antlib:org.apache.ivy.ant">
     <description>Ant file to build my RPM spec file parser task</description>
 
     <property environment="env"/>
@@ -36,9 +37,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <fileset dir="${basedir}/lib">
           <include name="*.jar" />
         </fileset>
+<!--
         <fileset dir="${env.ANT_HOME}/lib">
           <include name="*.jar" />
         </fileset>
+-->
     </path>
 
     <path id="classpath.test">
@@ -46,7 +49,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <path refid="classpath.base" />
     </path>
 
-    <target name="compile" description="compile the source">
+    <target name="compile" depends="resolve" description="compile the source">
         <mkdir dir="${dir.build}/classes"/>
         <javac srcdir="${dir.src}" destdir="${dir.build}/classes" includeantruntime="false">
             <classpath refid="classpath.base" />
@@ -69,7 +72,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <attribute name="Implementation-Title" value="RPM spec file parser"/>
                 <attribute name="Implementation-Version" value="${build.version}"/>
             </manifest>
-          </jar>
+        </jar>
+        <jar destfile="${dir.dist}/${ant.project.name}-${build.version}-sources.jar" basedir="${dir.src}"/>
+<!--
+    	<jar destfile="${dir.dist}/${ant.project.name}-${build.version}-javadoc.jar" basedir="${dir.build}/javadoc"/>
+-->
     </target>
 
     <target name="clean" description="clean up">
@@ -78,6 +85,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </target>
 
     <target name="test" depends="dist,compile-tests" description="run junit test cases">
+<echo message="${toString:classpath.test}"/>
         <junit failureProperty="test.failure" fork="true" forkMode="once">
             <classpath refid="classpath.test"/>
             <formatter type="brief" usefile="false"/>
@@ -88,5 +96,82 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <fail message="test failed" if="test.failure" />
         <ant antfile="test.xml" target="test"/>
     </target>
+    
+    <!-- ================================= 
+          target: resolve              
+         ================================= -->
+    <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with ivy">
+        <ivy:retrieve sync="true" />
+        <ivy:cachepath pathid="ivy.path" />
+    </target>
+
+    <!-- ==================================================
+            ivy config starts here
+           ================================================== -->
+
+    <property name="ivy.install.version" value="2.2.0" />
+    <property name="ivy.jar.dir" value="${basedir}/ivy" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+    
+    <target name="download-ivy" unless="skip.download">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <!-- download Ivy from web site so that it can be used even without any special installation -->
+        <echo message="installing ivy..."/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+    
+    <!-- ================================= 
+          target: install-ivy         
+            this target is not necessary if you put ivy.jar in your ant lib directory
+            if you already have ivy in your ant lib, you can simply remove this
+            target and the dependency the 'go' target has on it
+         ================================= -->
+    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
+        <!-- try to load ivy here from local ivy dir, in case the user has not already dropped
+              it into ant's lib dir (note that the latter copy will always take precedence).
+              We will not fail as long as local lib dir exists (it may be empty) and
+              ivy is in at least one of ant's lib dir or the local lib dir. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                  uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>    
+    
+    <!-- ================================= 
+          target: go
+                    Go ivy, go!
+         ================================= -->
+    <target name="go" depends="install-ivy" 
+            description="--> resolve dependencies, compile and run the project">
+        <!-- here comes the magic line: asks ivy to resolve a dependency on 
+             commons-lang 2.1 and to build an ant path with it from its cache  -->
+<!--
+        <ivy:cachepath organisation="commons-lang" module="commons-lang" revision="2.1" 
+                       pathid="lib.path.id" inline="true"/>
+-->
+    </target>
+
+    <!-- ================================= 
+          target: clean-ivy              
+         ================================= -->
+    <target name="clean-ivy" description="--> clean the ivy installation">
+        <delete dir="${ivy.jar.dir}"/>
+    </target>
+    
+    <!-- ================================= 
+          target: clean-cache              
+         ================================= -->
+    <target name="clean-cache" depends="install-ivy" 
+            description="--> clean the ivy cache">
+        <ivy:cleancache />
+    </target>
+
+    <!-- ==================================================
+            ivy config ends here
+           ================================================== -->
+
+
 
 </project>
