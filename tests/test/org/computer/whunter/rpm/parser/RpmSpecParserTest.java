@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2012, Warwick Hunter. All rights reserved.
+ * Copyright 2012, Sean Flanigan. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
@@ -29,10 +30,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.computer.whunter.rpm.parser.RpmSpecParser;
 import org.junit.Test;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Tests of the RPM spec file parser.
@@ -47,14 +51,23 @@ public class RpmSpecParserTest {
         try {
             RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
             assertNotNull(parser);
-            checkP4BugzillaResults(parser.parse());
+            checkP4BugzillaResults(toProperties(parser.parse()));
         }
         catch (FileNotFoundException e) {
             fail(e.toString());
         }
     }
 
-    private void checkP4BugzillaResults(Properties properties) {
+    private Properties toProperties(Multimap<String, String> multimap)
+   {
+      Properties props = new Properties();
+      for (Map.Entry<String, String> entry : multimap.entries()) {
+         props.setProperty(entry.getKey(), entry.getValue());
+      }
+      return props;
+   }
+
+   private void checkP4BugzillaResults(Properties properties) {
         assertNotNull(properties);
         assertTrue(properties.size() > 0);
         assertEquals("p4bugzilla", properties.getProperty("name"));
@@ -83,7 +96,7 @@ public class RpmSpecParserTest {
             RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
             assertNotNull(parser);
             for (int i = 0; i < 5; ++i) {
-                checkP4BugzillaResults(parser.parse());
+                checkP4BugzillaResults(toProperties(parser.parse()));
             }
         }
         catch (FileNotFoundException e) {
@@ -95,7 +108,7 @@ public class RpmSpecParserTest {
     public void testExampleCode() {
         try {
             RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
-            Properties properties = parser.parse();
+            Properties properties = toProperties(parser.parse());
             System.out.printf("RPM name: %s %n", properties.getProperty("name"));
             System.out.printf("RPM version: %s-%s %n", properties.getProperty("version"), properties.getProperty("release"));
         }
