@@ -73,6 +73,5 @@ testAnt << {
     ant.ant(antfile:'test.xml', target:'testTask')
 }
 
-test {
-    dependsOn testAnt
-}
+test.dependsOn testAnt
+install.dependsOn build
