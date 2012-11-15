@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2012, Warwick Hunter. All rights reserved.
+ * Copyright 2012, Sean Flanigan. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
@@ -24,6 +25,7 @@
 package org.computer.whunter.rpm.ant;
 
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.tools.ant.BuildException;
@@ -31,6 +33,8 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.PropertyHelper;
 import org.apache.tools.ant.Task;
 import org.computer.whunter.rpm.parser.RpmSpecParser;
+
+import com.google.common.collect.Multimap;
 
 /**
  * An Ant task that parses an RPM Spec file and pushes the information from the spec file
@@ -69,13 +73,13 @@ public class RpmSpec extends Task {
         try {
             // Parse the RPM spec file and extract the interesting fields and macro definitions
             RpmSpecParser parser = RpmSpecParser.createParser(m_srcfile);
-            Properties properties = parser.parse();
+            Multimap<String, String> properties = parser.parse();
             
             // Push all the fields and macros into the project as properties
             Project project = getProject();
             StringBuilder prefix = new StringBuilder(m_env).append(".");
-            for (Object key : properties.keySet()) {
-                project.setProperty(prefix.toString() + key, properties.get(key).toString());
+            for (Map.Entry<String, String> entry : properties.entries()) {
+               project.setProperty(prefix.toString() + entry.getKey(), entry.getValue());
             }
         }
         catch (FileNotFoundException e) {
