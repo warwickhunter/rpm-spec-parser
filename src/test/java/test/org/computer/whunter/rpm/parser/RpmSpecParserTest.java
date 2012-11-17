@@ -58,8 +58,7 @@ public class RpmSpecParserTest {
         }
     }
 
-    private Properties toProperties(Multimap<String, String> multimap)
-   {
+    private Properties toProperties(Multimap<String, String> multimap) {
       Properties props = new Properties();
       for (Map.Entry<String, String> entry : multimap.entries()) {
          props.setProperty(entry.getKey(), entry.getValue());

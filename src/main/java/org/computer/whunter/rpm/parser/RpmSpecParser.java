@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 
 /**
  * This is a parser of an RPM Spec file. It extracts a number of properties from an RPM spec file
@@ -149,7 +148,6 @@ public class RpmSpecParser {
                         value.append(words[i]);
                     }
                     assert !properties.containsKey(words[1]);
-//                    properties.removeAll(words[1]);
                     properties.put(words[1], value.toString().trim());
                     // Add a matcher pattern for it so that any references to it can be expanded
                     StringBuilder macroMatchRegex = new StringBuilder(".*%\\{");
