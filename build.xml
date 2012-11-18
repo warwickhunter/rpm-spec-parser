@@ -1,0 +1,98 @@
+<!--
+Copyright (c) 2012, Warwick Hunter. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+ 1. Redistributions of source code must retain the above copyright notice, this list 
+    of conditions and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright notice, this 
+    list of conditions and the following disclaimer in the documentation and/or other 
+    materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<project name="rpm-spec-parser" default="test" xmlns:ivy="antlib:org.apache.ivy.ant">
+    <description>Ant file to build my RPM spec file parser task</description>
+
+    <property environment="env"/>
+    <property name="dir.build"     value="${basedir}/build"/>
+    <property name="dir.lib"       value="${basedir}/lib"/>
+    <property name="dir.src"       value="${basedir}/src/main/java"/>
+    <property name="dir.test"      value="${basedir}/src/test/java"/>
+    <property name="dir.dist"      value="${basedir}/dist"/>
+    <property name="build.version" value="1.0"/>
+
+    <path id="classpath.base">
+        <pathelement location="${dir.build}/classes"/>
+        <fileset dir="${basedir}/lib">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${env.ANT_HOME}/lib">
+          <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <path id="classpath.test">
+        <pathelement location="${dir.build}/tests"/>
+        <path refid="classpath.base" />
+    </path>
+
+    <target name="resolve" description="retrieve dependencies with ivy">
+        <ivy:retrieve />
+    </target>
+
+    <target name="compile" depends="resolve" description="compile the source">
+        <mkdir dir="${dir.build}/classes"/>
+        <javac srcdir="${dir.src}" destdir="${dir.build}/classes" includeantruntime="false">
+            <classpath refid="classpath.base" />
+        </javac>
+    </target>
+
+    <target name="compile-tests" description="compile the test source">
+        <mkdir dir="${dir.build}/tests"/>
+        <javac srcdir="${dir.test}" destdir="${dir.build}/tests" includeantruntime="false">
+            <classpath refid="classpath.test" />
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile" description="generate the jar" >
+        <mkdir dir="${dir.dist}"/>
+        <jar destfile="${dir.dist}/${ant.project.name}-${build.version}.jar" basedir="${dir.build}/classes">
+            <manifest>
+                <attribute name="Built-By" value="Warwick Hunter w.hunter@computer.org"/>
+                <attribute name="Implementation-Vendor" value="Warwick Hunter"/>
+                <attribute name="Implementation-Title" value="RPM spec file parser"/>
+                <attribute name="Implementation-Version" value="${build.version}"/>
+            </manifest>
+          </jar>
+    </target>
+
+    <target name="clean" description="clean up">
+        <delete dir="${dir.lib}"/>
+        <delete dir="${dir.build}"/>
+        <delete dir="${dir.dist}"/>
+    </target>
+
+    <target name="test" depends="dist,compile-tests" description="run junit test cases">
+        <junit failureProperty="test.failure" fork="true" forkMode="once">
+            <classpath refid="classpath.test"/>
+            <formatter type="brief" usefile="false"/>
+            <batchtest todir="${dir.dist}">
+              <fileset dir="${basedir}/tests" includes="**/*Test.java"/>
+            </batchtest>
+        </junit>
+        <fail message="test failed" if="test.failure" />
+        <ant antfile="test.xml" target="test"/>
+    </target>
+
+</project>
