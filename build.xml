@@ -47,7 +47,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <path refid="classpath.base" />
     </path>
 
-    <target name="resolve" description="retrieve dependencies with ivy">
+    <target name="resolve" description="Retrieve dependencies with ivy">
         <ivy:retrieve />
     </target>
 
