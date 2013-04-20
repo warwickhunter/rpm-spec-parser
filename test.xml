@@ -25,7 +25,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <project name="rpm-spec-parser-test" default="test">
     <description>Ant file to execute my RPM Specfile parser task and test its operation</description>
 
-    <taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${runtimeClasspath}" />
+    <path id="classpath.test">
+        <fileset dir="${basedir}/dist">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${basedir}/lib">
+          <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${toString:classpath.test}" />
 
     <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="r" if="yes"/>
     <property name="foo" value="${r.source0}"/>

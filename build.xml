@@ -37,14 +37,17 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <fileset dir="${basedir}/lib">
           <include name="*.jar" />
         </fileset>
-        <fileset dir="${env.ANT_HOME}/lib">
-          <include name="*.jar" />
-        </fileset>
     </path>
 
     <path id="classpath.test">
         <pathelement location="${dir.build}/tests"/>
-        <path refid="classpath.base" />
+        <fileset dir="${dir.lib}">
+          <include name="*.jar" />
+          <exclude name="ant*.jar" />
+        </fileset>
+        <fileset dir="${dir.dist}">
+          <include name="*.jar" />
+        </fileset>
     </path>
 
     <target name="resolve" description="Retrieve dependencies with ivy">
@@ -88,11 +91,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <classpath refid="classpath.test"/>
             <formatter type="brief" usefile="false"/>
             <batchtest todir="${dir.dist}">
-              <fileset dir="${basedir}/tests" includes="**/*Test.java"/>
+              <fileset dir="${dir.test}" includes="**/*Test.java"/>
             </batchtest>
         </junit>
         <fail message="test failed" if="test.failure" />
-        <ant antfile="test.xml" target="test"/>
+        <ant antfile="test.xml" target="testTask"/>
     </target>
 
 </project>
