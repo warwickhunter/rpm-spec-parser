@@ -25,7 +25,7 @@ public class RpmSpecParserTest {
     @Test
     public void testSingleParsing() {
         try {
-            RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
+            RpmSpecParser parser = RpmSpecParser.createParser("src/test/resources/specs/p4bugzilla.spec");
             assertNotNull(parser);
             checkP4BugzillaResults(parser.parse());
         }
@@ -60,7 +60,7 @@ public class RpmSpecParserTest {
     @Test
     public void testDualParsing() {
         try {
-            RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
+            RpmSpecParser parser = RpmSpecParser.createParser("src/test/resources/specs/p4bugzilla.spec");
             assertNotNull(parser);
             for (int i = 0; i < 5; ++i) {
                 checkP4BugzillaResults(parser.parse());
@@ -74,7 +74,7 @@ public class RpmSpecParserTest {
     @Test
     public void testExampleCode() {
         try {
-            RpmSpecParser parser = RpmSpecParser.createParser("tests/specs/p4bugzilla.spec");
+            RpmSpecParser parser = RpmSpecParser.createParser("src/test/resources/specs/p4bugzilla.spec");
             Properties properties = parser.parse();
             System.out.printf("RPM name: %s %n", properties.getProperty("name"));
             System.out.printf("RPM version: %s-%s %n", properties.getProperty("version"), properties.getProperty("release"));

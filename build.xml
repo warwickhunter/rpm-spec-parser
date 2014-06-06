@@ -3,9 +3,9 @@
 
     <property environment="env"/>
     <property name="dir.build"     value="${basedir}/build"/>
-    <property name="dir.src"       value="${basedir}/src"/>
-    <property name="dir.test"      value="${basedir}/tests"/>
-    <property name="dir.dist"      value="${basedir}/dist"/>
+    <property name="dir.src"       value="${basedir}/src/main/java"/>
+    <property name="dir.test"      value="${basedir}/src/test/java"/>
+    <property name="dir.dist"      value="${basedir}/build/libs"/>
     <property name="build.version" value="1.0"/>
 
     <path id="classpath.base">
@@ -59,7 +59,7 @@
             <classpath refid="classpath.test"/>
             <formatter type="brief" usefile="false"/>
             <batchtest todir="${dir.dist}">
-              <fileset dir="${basedir}/tests" includes="**/*Test.java"/>
+              <fileset dir="${basedir}/src/test/java" includes="**/*Test.java"/>
             </batchtest>
         </junit>
         <fail message="test failed" if="test.failure" />

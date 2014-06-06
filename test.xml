@@ -1,21 +1,21 @@
 <project name="rpm-spec-parser-test" default="test">
-	<description>Ant file to execute my RPM Specfile parser task and test its operation</description>
+    <description>Ant file to execute my RPM Specfile parser task and test its operation</description>
 
-	<property name="dir.dist" value="${basedir}/dist" />
+    <property name="dir.dist" value="${basedir}/build/libs" />
 
-	<taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${dir.dist}/rpm-spec-parser-1.0.jar" />
+    <taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${dir.dist}/rpm-spec-parser-1.0.jar" />
 
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="r" if="yes"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="r" if="yes"/>
     <property name="foo" value="${r.source0}"/>
 
     <property name="do.it" value="true"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="yes1" if="do.it"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="yes2" if="${do.it}"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="yes3" if="yes"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="yes4" unless="no"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="no1" if="no"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="no2" unless="yes"/>
-    <rpmspec srcfile="tests/specs/p4bugzilla.spec" env="no3" unless="${do.it}"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes1" if="do.it"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes2" if="${do.it}"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes3" if="yes"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes4" unless="no"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="no1" if="no"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="no2" unless="yes"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="no3" unless="${do.it}"/>
     
     <fail message="if condition not obeyed" unless="yes1.name"/>
     <fail message="if condition not obeyed" unless="yes2.name"/>
