@@ -1,5 +1,26 @@
 /**
- * Copyright Warwick Hunter 2012. All rights reserved.
+ * Copyright (c) 2012, Warwick Hunter. All rights reserved.
+ * Copyright 2012, Sean Flanigan. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ * 
+ *  1. Redistributions of source code must retain the above copyright notice, this list 
+ *     of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright notice, this 
+ *     list of conditions and the following disclaimer in the documentation and/or other 
+ *     materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package test.org.computer.whunter.rpm.parser;
 
@@ -9,10 +30,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.computer.whunter.rpm.parser.RpmSpecParser;
 import org.junit.Test;
+
+import com.google.common.collect.Multimap;
 
 /**
  * Tests of the RPM spec file parser.
@@ -27,14 +51,22 @@ public class RpmSpecParserTest {
         try {
             RpmSpecParser parser = RpmSpecParser.createParser("src/test/resources/specs/p4bugzilla.spec");
             assertNotNull(parser);
-            checkP4BugzillaResults(parser.parse());
+            checkP4BugzillaResults(toProperties(parser.parse()));
         }
         catch (FileNotFoundException e) {
             fail(e.toString());
         }
     }
 
-    private void checkP4BugzillaResults(Properties properties) {
+    private Properties toProperties(Multimap<String, String> multimap) {
+      Properties props = new Properties();
+      for (Map.Entry<String, String> entry : multimap.entries()) {
+         props.setProperty(entry.getKey(), entry.getValue());
+      }
+      return props;
+   }
+
+   private void checkP4BugzillaResults(Properties properties) {
         assertNotNull(properties);
         assertTrue(properties.size() > 0);
         assertEquals("p4bugzilla", properties.getProperty("name"));
@@ -63,7 +95,7 @@ public class RpmSpecParserTest {
             RpmSpecParser parser = RpmSpecParser.createParser("src/test/resources/specs/p4bugzilla.spec");
             assertNotNull(parser);
             for (int i = 0; i < 5; ++i) {
-                checkP4BugzillaResults(parser.parse());
+                checkP4BugzillaResults(toProperties(parser.parse()));
             }
         }
         catch (FileNotFoundException e) {

@@ -1,4 +1,6 @@
 bin
 dist
 build
+lib
+ivy
 .gradle
