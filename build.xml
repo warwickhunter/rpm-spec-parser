@@ -40,7 +40,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <path id="classpath.test">
         <pathelement location="${dir.build}/tests"/>
-        <fileset dir="${dir.lib}">
+        <fileset dir="${basedir}/lib">
           <include name="*.jar" />
           <exclude name="ant*.jar" />
         </fileset>

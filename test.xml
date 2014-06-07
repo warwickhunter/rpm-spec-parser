@@ -22,11 +22,11 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<project name="rpm-spec-parser-test" default="test">
+<project name="rpm-spec-parser-test" default="testTask">
     <description>Ant file to execute my RPM Specfile parser task and test its operation</description>
 
     <path id="classpath.test">
-        <fileset dir="${basedir}/dist">
+        <fileset dir="${basedir}/build/libs">
           <include name="*.jar" />
         </fileset>
         <fileset dir="${basedir}/lib">
@@ -36,17 +36,17 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <taskdef name="rpmspec" classname="org.computer.whunter.rpm.ant.RpmSpec" classpath="${toString:classpath.test}" />
 
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="r" if="yes"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="r" if="yes"/>
     <property name="foo" value="${r.source0}"/>
 
     <property name="do.it" value="true"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="yes1" if="do.it"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="yes2" if="${do.it}"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="yes3" if="yes"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="yes4" unless="no"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="no1" if="no"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="no2" unless="yes"/>
-    <rpmspec srcfile="src/test/etc/specs/p4bugzilla.spec" env="no3" unless="${do.it}"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes1" if="do.it"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes2" if="${do.it}"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes3" if="yes"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="yes4" unless="no"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="no1" if="no"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="no2" unless="yes"/>
+    <rpmspec srcfile="src/test/resources/specs/p4bugzilla.spec" env="no3" unless="${do.it}"/>
     
     <fail message="if condition not obeyed" unless="yes1.name"/>
     <fail message="if condition not obeyed" unless="yes2.name"/>

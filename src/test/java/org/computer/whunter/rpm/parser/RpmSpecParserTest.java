@@ -22,7 +22,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package test.org.computer.whunter.rpm.parser;
+package org.computer.whunter.rpm.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -107,9 +107,9 @@ public class RpmSpecParserTest {
     public void testExampleCode() {
         try {
             RpmSpecParser parser = RpmSpecParser.createParser("src/test/resources/specs/p4bugzilla.spec");
-            Properties properties = parser.parse();
-            System.out.printf("RPM name: %s %n", properties.getProperty("name"));
-            System.out.printf("RPM version: %s-%s %n", properties.getProperty("version"), properties.getProperty("release"));
+            Multimap<String, String> properties = parser.parse();
+            System.out.printf("RPM name: %s %n", properties.get("name"));
+            System.out.printf("RPM version: %s-%s %n", properties.get("version"), properties.get("release"));
         }
         catch (FileNotFoundException e) {
             // ...
