@@ -62,8 +62,6 @@ task testAnt(dependsOn: [jar,resolve]) {
 }
 
 testAnt << {
-    // Tell Ant where to find dependency jars
-    ant.properties['runtimeClasspath'] = "build/libs/${archivesBaseName}-${version}.jar:"+configurations.runtime.asPath
     ant.ant(antfile:'test.xml', target:'testTask')
 }
 
